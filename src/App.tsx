@@ -1,9 +1,9 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import classes from "./App.module.css";
 
 type Mode = "edit" | "progress";
-type DeadCell = "x";
-type AliveCell = "-";
+type DeadCell = "dead";
+type AliveCell = "alive";
 type Cell = DeadCell | AliveCell;
 
 type AroundCell = Cell | undefined;
@@ -18,19 +18,25 @@ type Around8Cells = [
   AroundCell,
 ];
 
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 function isAliveCell(cell: Cell | undefined): boolean {
-  return cell === "-";
+  return cell === "alive";
 }
 
 function deadOrAlive(target: Cell, around: Around8Cells): Cell {
   const aliveSize = around.filter(isAliveCell).length;
   if (isAliveCell(target)) {
     if (aliveSize === 2 || aliveSize === 3) {
-      return "x";
+      return "alive";
     }
-    return "-";
+    return "dead";
   }
-  return aliveSize === 3 ? "-" : "x";
+  return aliveSize === 3 ? "alive" : "dead";
 }
 
 function createCells(
@@ -39,7 +45,7 @@ function createCells(
   original?: Cell[][],
 ): Cell[][] {
   const newCells: Cell[][] = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => "-" as const),
+    Array.from({ length: width }, () => "dead" as const),
   );
   if (original === undefined) {
     return newCells;
@@ -51,6 +57,14 @@ function createCells(
     });
   });
   return newCells;
+}
+
+function getCell(cells: Cell[][], i: number, j: number): Cell | undefined {
+  const row = cells[i];
+  if (row === undefined) {
+    return undefined;
+  }
+  return row[j];
 }
 
 function App() {
@@ -83,7 +97,7 @@ function App() {
   };
 
   const handleCellClick = (i: number, j: number) => {
-    const newCell = cells[i][j] === "x" ? "-" : "x";
+    const newCell = cells[i][j] === "dead" ? "alive" : "dead";
     const newCells = cells.map((row, index1) => {
       if (index1 === i) {
         return row.map((column, index2) => {
@@ -94,6 +108,33 @@ function App() {
     });
     setCells(newCells);
   };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
+  useEffect(() => {
+    if (mode === "edit") {
+      return;
+    }
+    (async () => {
+      await sleep(500);
+      const newCells = createCells(size.width, size.height, cells);
+      for (let i = 0; i < newCells.length; i++) {
+        for (let j = 0; j < newCells[i].length; j++) {
+          const newCell = deadOrAlive(cells[i][j], [
+            getCell(cells, i - 1, j - 1),
+            getCell(cells, i - 1, j),
+            getCell(cells, i - 1, j + 1),
+            getCell(cells, i, j - 1),
+            getCell(cells, i, j + 1),
+            getCell(cells, i + 1, j - 1),
+            getCell(cells, i + 1, j),
+            getCell(cells, i + 1, j + 1),
+          ]);
+          newCells[i][j] = newCell;
+        }
+      }
+      setCells(newCells);
+    })();
+  }, [mode, size, cells]);
 
   return (
     <main className={classes.container}>
@@ -139,7 +180,7 @@ function App() {
                 type="button"
                 className={classes.cell}
                 style={{
-                  backgroundColor: isAliveCell(column) ? "white" : "gray",
+                  backgroundColor: isAliveCell(column) ? "gray" : "white",
                 }}
                 onClick={() => handleCellClick(i, j)}
                 disabled={mode === "progress"}
