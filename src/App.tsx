@@ -59,14 +59,6 @@ function createCells(
   return newCells;
 }
 
-function getCell(cells: Cell[][], i: number, j: number): Cell | undefined {
-  const row = cells[i];
-  if (row === undefined) {
-    return undefined;
-  }
-  return row[j];
-}
-
 function App() {
   const [size, setSize] = useState({ width: 30, height: 30 });
 
@@ -120,14 +112,14 @@ function App() {
       for (let i = 0; i < newCells.length; i++) {
         for (let j = 0; j < newCells[i].length; j++) {
           const newCell = deadOrAlive(cells[i][j], [
-            getCell(cells, i - 1, j - 1),
-            getCell(cells, i - 1, j),
-            getCell(cells, i - 1, j + 1),
-            getCell(cells, i, j - 1),
-            getCell(cells, i, j + 1),
-            getCell(cells, i + 1, j - 1),
-            getCell(cells, i + 1, j),
-            getCell(cells, i + 1, j + 1),
+            cells[i - 1]?.[j - 1],
+            cells[i - 1]?.[j],
+            cells[i - 1]?.[j + 1],
+            cells[i]?.[j - 1],
+            cells[i]?.[j + 1],
+            cells[i + 1]?.[j - 1],
+            cells[i + 1]?.[j],
+            cells[i + 1]?.[j + 1],
           ]);
           newCells[i][j] = newCell;
         }
@@ -160,7 +152,7 @@ function App() {
         </div>
         <div>
           <button type="button" onClick={handleModeChange}>
-            {mode === "edit" ? "Start" : "Edit"}
+            {mode === "edit" ? "Start" : "Stop"}
           </button>
         </div>
       </div>
