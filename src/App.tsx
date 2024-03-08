@@ -151,6 +151,7 @@ function App() {
               value={size.width}
               onChange={handleWidthChange}
               onBlur={cellSizeChange}
+              disabled={mode === "progress"}
             />
           </label>
           <label>
@@ -159,6 +160,7 @@ function App() {
               value={size.height}
               onChange={handleHeightChange}
               onBlur={cellSizeChange}
+              disabled={mode === "progress"}
             />
           </label>
         </div>
@@ -243,7 +245,36 @@ const beacon = {
 `,
 };
 
-const presets = [blinker, beacon].map((it) => ({
+const gliderGun = {
+  name: "Glider Gun",
+  cells: `\
+                                      
+                         x            
+                       x x            
+             xx      xx            xx 
+            x   x    xx            xx 
+ xx        x     x   xx               
+ xx        x   x xx    x x            
+           x     x       x            
+            x   x                     
+             xx                       
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+`,
+};
+
+const presets = [blinker, beacon, gliderGun].map((it) => ({
   ...it,
   cells: parsePresetAsCells(it.cells),
 }));
