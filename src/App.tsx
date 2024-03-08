@@ -101,6 +101,18 @@ function App() {
     setCells(newCells);
   };
 
+  const handlePresetsChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const found = presets.find((it) => it.name === event.target.value);
+    if (found === undefined) {
+      throw new Error(`not found ${event.target.value} in presets`);
+    }
+    setCells(found.cells);
+  };
+
+  const handleClearClick = () => {
+    setCells(createCells(size.width, size.height));
+  };
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
   useEffect(() => {
     if (mode === "edit") {
@@ -108,15 +120,15 @@ function App() {
     }
     (async () => {
       await sleep(500);
-      const newCells = createCells(size.width, size.height, cells);
+      const newCells = cells.map((row) => [...row]);
       for (let i = 0; i < newCells.length; i++) {
         for (let j = 0; j < newCells[i].length; j++) {
           const newCell = deadOrAlive(cells[i][j], [
             cells[i - 1]?.[j - 1],
             cells[i - 1]?.[j],
             cells[i - 1]?.[j + 1],
-            cells[i]?.[j - 1],
-            cells[i]?.[j + 1],
+            cells[i][j - 1],
+            cells[i][j + 1],
             cells[i + 1]?.[j - 1],
             cells[i + 1]?.[j],
             cells[i + 1]?.[j + 1],
@@ -151,8 +163,29 @@ function App() {
           </label>
         </div>
         <div>
+          <label>
+            presets
+            <br />
+            <select
+              onChange={handlePresetsChange}
+              disabled={mode === "progress"}
+            >
+              {presets.map((it) => (
+                <option value={it.name}>{it.name}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div>
           <button type="button" onClick={handleModeChange}>
             {mode === "edit" ? "Start" : "Stop"}
+          </button>
+          <button
+            type="button"
+            onClick={handleClearClick}
+            disabled={mode === "progress"}
+          >
+            Clear
           </button>
         </div>
       </div>
@@ -186,3 +219,45 @@ function App() {
 }
 
 export default App;
+
+const blinker = {
+  name: "Blinker",
+  cells: `\
+     
+  x  
+  x  
+  x  
+     
+`,
+};
+
+const beacon = {
+  name: "Beacon",
+  cells: `\
+        
+  xx    
+  xx    
+    xx  
+    xx  
+        
+`,
+};
+
+const presets = [blinker, beacon].map((it) => ({
+  ...it,
+  cells: parsePresetAsCells(it.cells),
+}));
+
+function parsePresetAsCells(preset: string): Cell[][] {
+  return preset.split("\n").map((line) => {
+    return line.split("").map((char) => {
+      if (char === " ") {
+        return "dead" as const;
+      }
+      if (char === "x") {
+        return "alive" as const;
+      }
+      throw new Error(`invalid char: ${char}`);
+    });
+  });
+}
