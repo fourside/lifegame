@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState, useTransition } from "react";
 import classes from "./App.module.css";
 
 type Mode = "edit" | "progress";
@@ -113,6 +113,8 @@ function App() {
     setCells(createCells(size.width, size.height));
   };
 
+  const [_, startTransition] = useTransition();
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
   useEffect(() => {
     if (mode === "edit") {
@@ -136,7 +138,9 @@ function App() {
           newCells[i][j] = newCell;
         }
       }
-      setCells(newCells);
+      startTransition(() => {
+        setCells(newCells);
+      });
     })();
   }, [mode, size, cells]);
 
