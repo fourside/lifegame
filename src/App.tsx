@@ -1,62 +1,14 @@
 import { ChangeEvent, useEffect, useState, useTransition } from "react";
 import classes from "./App.module.css";
+import { type Cell, createCells, deadOrAlive, isAliveCell } from "./cell";
+import { PRESETS } from "./presets";
 
 type Mode = "edit" | "progress";
-type DeadCell = "dead";
-type AliveCell = "alive";
-type Cell = DeadCell | AliveCell;
-
-type AroundCell = Cell | undefined;
-type Around8Cells = [
-  AroundCell,
-  AroundCell,
-  AroundCell,
-  AroundCell,
-  AroundCell,
-  AroundCell,
-  AroundCell,
-  AroundCell,
-];
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function isAliveCell(cell: Cell | undefined): boolean {
-  return cell === "alive";
-}
-
-function deadOrAlive(target: Cell, around: Around8Cells): Cell {
-  const aliveSize = around.filter(isAliveCell).length;
-  if (isAliveCell(target)) {
-    if (aliveSize === 2 || aliveSize === 3) {
-      return "alive";
-    }
-    return "dead";
-  }
-  return aliveSize === 3 ? "alive" : "dead";
-}
-
-function createCells(
-  width: number,
-  height: number,
-  original?: Cell[][],
-): Cell[][] {
-  const newCells: Cell[][] = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => "dead" as const),
-  );
-  if (original === undefined) {
-    return newCells;
-  }
-
-  newCells.forEach((row, i) => {
-    row.forEach((_, j) => {
-      newCells[i][j] = original[i][j];
-    });
-  });
-  return newCells;
 }
 
 function App() {
@@ -83,6 +35,7 @@ function App() {
   };
 
   const [mode, setMode] = useState<Mode>("edit");
+  const editDisabled = mode === "progress";
 
   const handleModeChange = () => {
     setMode((prev) => (prev === "edit" ? "progress" : "edit"));
@@ -102,7 +55,7 @@ function App() {
   };
 
   const handlePresetsChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const found = presets.find((it) => it.name === event.target.value);
+    const found = PRESETS.find((it) => it.name === event.target.value);
     if (found === undefined) {
       throw new Error(`not found ${event.target.value} in presets`);
     }
@@ -155,7 +108,7 @@ function App() {
               value={size.width}
               onChange={handleWidthChange}
               onBlur={cellSizeChange}
-              disabled={mode === "progress"}
+              disabled={editDisabled}
             />
           </label>
           <label>
@@ -164,7 +117,7 @@ function App() {
               value={size.height}
               onChange={handleHeightChange}
               onBlur={cellSizeChange}
-              disabled={mode === "progress"}
+              disabled={editDisabled}
             />
           </label>
         </div>
@@ -172,11 +125,8 @@ function App() {
           <label>
             presets
             <br />
-            <select
-              onChange={handlePresetsChange}
-              disabled={mode === "progress"}
-            >
-              {presets.map((it) => (
+            <select onChange={handlePresetsChange} disabled={editDisabled}>
+              {PRESETS.map((it) => (
                 <option value={it.name}>{it.name}</option>
               ))}
             </select>
@@ -189,7 +139,7 @@ function App() {
           <button
             type="button"
             onClick={handleClearClick}
-            disabled={mode === "progress"}
+            disabled={editDisabled}
           >
             Clear
           </button>
@@ -214,7 +164,7 @@ function App() {
                   backgroundColor: isAliveCell(column) ? "gray" : "white",
                 }}
                 onClick={() => handleCellClick(i, j)}
-                disabled={mode === "progress"}
+                disabled={editDisabled}
               />
             )),
           )}
@@ -225,74 +175,3 @@ function App() {
 }
 
 export default App;
-
-const blinker = {
-  name: "Blinker",
-  cells: `\
-     
-  x  
-  x  
-  x  
-     
-`,
-};
-
-const beacon = {
-  name: "Beacon",
-  cells: `\
-        
-  xx    
-  xx    
-    xx  
-    xx  
-        
-`,
-};
-
-const gliderGun = {
-  name: "Glider Gun",
-  cells: `\
-                                      
-                         x            
-                       x x            
-             xx      xx            xx 
-            x   x    xx            xx 
- xx        x     x   xx               
- xx        x   x xx    x x            
-           x     x       x            
-            x   x                     
-             xx                       
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-                                      
-`,
-};
-
-const presets = [blinker, beacon, gliderGun].map((it) => ({
-  ...it,
-  cells: parsePresetAsCells(it.cells),
-}));
-
-function parsePresetAsCells(preset: string): Cell[][] {
-  return preset.split("\n").map((line) => {
-    return line.split("").map((char) => {
-      if (char === " ") {
-        return "dead" as const;
-      }
-      if (char === "x") {
-        return "alive" as const;
-      }
-      throw new Error(`invalid char: ${char}`);
-    });
-  });
-}
