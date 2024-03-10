@@ -12,6 +12,12 @@
 	border-right: 1px solid lightgray;;
 }
 
+.buttons {
+	display: grid;
+	grid: auto / 1fr 1fr;
+	gap: 4px;
+}
+
 .board {
 	overflow-y: auto;
 	min-height: 100vh;

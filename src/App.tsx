@@ -1,3 +1,4 @@
+import { Button, Select, TextField } from "@radix-ui/themes";
 import { ChangeEvent, FC, useEffect, useState, useTransition } from "react";
 import classes from "./App.module.css";
 import { type Cell, createCells, evelove, isAliveCell } from "./cell";
@@ -18,8 +19,8 @@ function App() {
     createCells(size.width, size.height),
   );
 
-  const handleWidthChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseInt(event.target.value);
+  const handleWidthChange = (str: string) => {
+    const value = Number.parseInt(str);
     const width = Number.isNaN(value) ? 0 : value;
     setSize((prev) => ({ ...prev, width }));
   };
@@ -28,8 +29,8 @@ function App() {
     setCells(createCells(size.width, size.height, cells));
   };
 
-  const handleHeightChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseInt(event.target.value);
+  const handleHeightChange = (str: string) => {
+    const value = Number.parseInt(str);
     const height = Number.isNaN(value) ? 0 : value;
     setSize((prev) => ({ ...prev, height }));
   };
@@ -41,10 +42,10 @@ function App() {
     setMode((prev) => (prev === "edit" ? "progress" : "edit"));
   };
 
-  const handlePresetsChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const found = PRESETS.find((it) => it.name === event.target.value);
+  const handlePresetsChange = (value: string) => {
+    const found = PRESETS.find((it) => it.name === value);
     if (found === undefined) {
-      throw new Error(`not found ${event.target.value} in presets`);
+      throw new Error(`not found ${value} in presets`);
     }
     setCells(found.cells);
   };
@@ -64,7 +65,7 @@ function App() {
         <div>
           <label>
             width
-            <input
+            <TextInput
               value={size.width}
               onChange={handleWidthChange}
               onBlur={cellSizeChange}
@@ -73,7 +74,7 @@ function App() {
           </label>
           <label>
             height
-            <input
+            <TextInput
               value={size.height}
               onChange={handleHeightChange}
               onBlur={cellSizeChange}
@@ -85,26 +86,32 @@ function App() {
           <label>
             presets
             <br />
-            <select onChange={handlePresetsChange} disabled={editDisabled}>
-              {PRESETS.map((it) => (
-                <option key={it.name} value={it.name}>
-                  {it.name}
-                </option>
-              ))}
-            </select>
+            <Select.Root
+              onValueChange={handlePresetsChange}
+              disabled={editDisabled}
+            >
+              <Select.Trigger placeholder="select a preset" />
+              <Select.Content position="popper">
+                {PRESETS.map((it) => (
+                  <Select.Item key={it.name} value={it.name}>
+                    {it.name}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
           </label>
         </div>
-        <div>
-          <button type="button" onClick={handleModeChange}>
+        <div className={classes.buttons}>
+          <Button type="button" onClick={handleModeChange}>
             {mode === "edit" ? "Start" : "Stop"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleClearClick}
             disabled={editDisabled}
           >
             Clear
-          </button>
+          </Button>
         </div>
       </div>
       <div className={classes.board}>
@@ -195,5 +202,33 @@ const CellBoard: FC<CellBoardProps> = (props) => {
         )),
       )}
     </div>
+  );
+};
+
+type TextInputProps = {
+  value: string | number;
+  disabled: boolean;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+};
+
+const TextInput: FC<TextInputProps> = (props) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    props.onChange(event.target.value);
+  };
+
+  const handleBlur = () => {
+    props.onBlur();
+  };
+
+  return (
+    <TextField.Root>
+      <TextField.Input
+        value={props.value}
+        disabled={props.disabled}
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
+    </TextField.Root>
   );
 };
