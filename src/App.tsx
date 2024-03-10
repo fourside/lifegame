@@ -6,12 +6,6 @@ import { PRESETS } from "./presets";
 
 type Mode = "edit" | "progress";
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 function App() {
   const [size, setSize] = useState({ width: 30, height: 30 });
 
@@ -67,7 +61,7 @@ function App() {
     <main className={classes.container}>
       <div className={classes.sidemenu}>
         <h1>Lifegame</h1>
-        <div>
+        <div className={classes.size}>
           <label>
             width
             <TextInput
@@ -134,14 +128,14 @@ function App() {
         </div>
       </div>
       <div className={classes.board}>
-        {mode === "progress" ? (
+        {mode === "edit" ? (
+          <EditableCellBoard cells={cells} onChange={handleCellChange} />
+        ) : (
           <EvolvingCellBoard
             cells={cells}
             speed={speed}
             onChange={handleCellChange}
           />
-        ) : (
-          <EditableCellBoard cells={cells} onChange={handleCellChange} />
         )}
       </div>
     </main>
@@ -266,3 +260,9 @@ const TextInput: FC<TextInputProps> = (props) => {
     </TextField.Root>
   );
 };
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
