@@ -18,7 +18,7 @@ export function isAliveCell(cell: Cell | undefined): boolean {
   return cell === "alive";
 }
 
-export function deadOrAlive(target: Cell, around: Around8Cells): Cell {
+function deadOrAlive(target: Cell, around: Around8Cells): Cell {
   const aliveSize = around.filter(isAliveCell).length;
   if (isAliveCell(target)) {
     if (aliveSize === 2 || aliveSize === 3) {
@@ -46,5 +46,25 @@ export function createCells(
       newCells[i][j] = original[i]?.[j] ?? "dead";
     });
   });
+  return newCells;
+}
+
+export function evelove(cells: Cell[][]): Cell[][] {
+  const newCells = cells.map((row) => [...row]);
+  for (let i = 0; i < newCells.length; i++) {
+    for (let j = 0; j < newCells[i].length; j++) {
+      const newCell = deadOrAlive(cells[i][j], [
+        cells[i - 1]?.[j - 1],
+        cells[i - 1]?.[j],
+        cells[i - 1]?.[j + 1],
+        cells[i][j - 1],
+        cells[i][j + 1],
+        cells[i + 1]?.[j - 1],
+        cells[i + 1]?.[j],
+        cells[i + 1]?.[j + 1],
+      ]);
+      newCells[i][j] = newCell;
+    }
+  }
   return newCells;
 }

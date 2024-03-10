@@ -1,6 +1,6 @@
 import { ChangeEvent, FC, useEffect, useState, useTransition } from "react";
 import classes from "./App.module.css";
-import { type Cell, createCells, deadOrAlive, isAliveCell } from "./cell";
+import { type Cell, createCells, evelove, isAliveCell } from "./cell";
 import { PRESETS } from "./presets";
 
 type Mode = "edit" | "progress";
@@ -87,7 +87,9 @@ function App() {
             <br />
             <select onChange={handlePresetsChange} disabled={editDisabled}>
               {PRESETS.map((it) => (
-                <option value={it.name}>{it.name}</option>
+                <option key={it.name} value={it.name}>
+                  {it.name}
+                </option>
               ))}
             </select>
           </label>
@@ -148,27 +150,11 @@ type EvolvingCellBoardProps = {
 const EvolvingCellBoard: FC<EvolvingCellBoardProps> = (props) => {
   const [_, startTransition] = useTransition();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
   useEffect(() => {
     (async () => {
       await sleep(500);
-      const newCells = props.cells.map((row) => [...row]);
-      for (let i = 0; i < newCells.length; i++) {
-        for (let j = 0; j < newCells[i].length; j++) {
-          const newCell = deadOrAlive(props.cells[i][j], [
-            props.cells[i - 1]?.[j - 1],
-            props.cells[i - 1]?.[j],
-            props.cells[i - 1]?.[j + 1],
-            props.cells[i][j - 1],
-            props.cells[i][j + 1],
-            props.cells[i + 1]?.[j - 1],
-            props.cells[i + 1]?.[j],
-            props.cells[i + 1]?.[j + 1],
-          ]);
-          newCells[i][j] = newCell;
-        }
-      }
       startTransition(() => {
+        const newCells = evelove(props.cells);
         props.onChange(newCells);
       });
     })();
