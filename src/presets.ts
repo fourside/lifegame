@@ -66,7 +66,12 @@ const gliderGun = {
 `,
 };
 
-export const PRESETS = [blinker, beacon, gliderGun].map((it) => ({
+type Preset = {
+  name: string;
+  cells: Cell[][];
+};
+
+export const PRESETS: Preset[] = [blinker, beacon, gliderGun].map((it) => ({
   ...it,
   cells: parsePresetAsCells(it.cells),
 }));

@@ -43,7 +43,7 @@ export function createCells(
 
   newCells.forEach((row, i) => {
     row.forEach((_, j) => {
-      newCells[i][j] = original[i][j];
+      newCells[i][j] = original[i]?.[j] ?? "dead";
     });
   });
   return newCells;

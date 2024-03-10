@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState, useTransition } from "react";
+import { ChangeEvent, FC, useEffect, useState, useTransition } from "react";
 import classes from "./App.module.css";
 import { type Cell, createCells, deadOrAlive, isAliveCell } from "./cell";
 import { PRESETS } from "./presets";
@@ -41,19 +41,6 @@ function App() {
     setMode((prev) => (prev === "edit" ? "progress" : "edit"));
   };
 
-  const handleCellClick = (i: number, j: number) => {
-    const newCell = cells[i][j] === "dead" ? "alive" : "dead";
-    const newCells = cells.map((row, index1) => {
-      if (index1 === i) {
-        return row.map((column, index2) => {
-          return index2 === j ? newCell : column;
-        });
-      }
-      return row;
-    });
-    setCells(newCells);
-  };
-
   const handlePresetsChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const found = PRESETS.find((it) => it.name === event.target.value);
     if (found === undefined) {
@@ -62,40 +49,13 @@ function App() {
     setCells(found.cells);
   };
 
+  const handleCellChange = (newCells: Cell[][]) => {
+    setCells(newCells);
+  };
+
   const handleClearClick = () => {
     setCells(createCells(size.width, size.height));
   };
-
-  const [_, startTransition] = useTransition();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
-  useEffect(() => {
-    if (mode === "edit") {
-      return;
-    }
-    (async () => {
-      await sleep(500);
-      const newCells = cells.map((row) => [...row]);
-      for (let i = 0; i < newCells.length; i++) {
-        for (let j = 0; j < newCells[i].length; j++) {
-          const newCell = deadOrAlive(cells[i][j], [
-            cells[i - 1]?.[j - 1],
-            cells[i - 1]?.[j],
-            cells[i - 1]?.[j + 1],
-            cells[i][j - 1],
-            cells[i][j + 1],
-            cells[i + 1]?.[j - 1],
-            cells[i + 1]?.[j],
-            cells[i + 1]?.[j + 1],
-          ]);
-          newCells[i][j] = newCell;
-        }
-      }
-      startTransition(() => {
-        setCells(newCells);
-      });
-    })();
-  }, [mode, size, cells]);
 
   return (
     <main className={classes.container}>
@@ -146,32 +106,108 @@ function App() {
         </div>
       </div>
       <div className={classes.board}>
-        <div
-          className={classes.cells}
-          style={{
-            gridTemplateRows: `repeat(${cells.length}, 1fr)`,
-            gridTemplateColumns: `repeat(${cells[0].length}, 1fr)`,
-          }}
-        >
-          {cells.map((row, i) =>
-            row.map((column, j) => (
-              <button
-                // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                key={`${i}_${j}`}
-                type="button"
-                className={classes.cell}
-                style={{
-                  backgroundColor: isAliveCell(column) ? "gray" : "white",
-                }}
-                onClick={() => handleCellClick(i, j)}
-                disabled={editDisabled}
-              />
-            )),
-          )}
-        </div>
+        {mode === "progress" ? (
+          <EvolvingCellBoard cells={cells} onChange={handleCellChange} />
+        ) : (
+          <EditableCellBoard cells={cells} onChange={handleCellChange} />
+        )}
       </div>
     </main>
   );
 }
 
 export default App;
+
+type EditableCellBoardProps = {
+  cells: Cell[][];
+  onChange: (cells: Cell[][]) => void;
+};
+
+const EditableCellBoard: FC<EditableCellBoardProps> = (props) => {
+  const handleCellClick = (i: number, j: number) => {
+    const newCell = props.cells[i][j] === "dead" ? "alive" : "dead";
+    const newCells = props.cells.map((row, index1) => {
+      if (index1 === i) {
+        return row.map((column, index2) => {
+          return index2 === j ? newCell : column;
+        });
+      }
+      return row;
+    });
+    props.onChange(newCells);
+  };
+
+  return <CellBoard cells={props.cells} onClick={handleCellClick} />;
+};
+
+type EvolvingCellBoardProps = {
+  cells: Cell[][];
+  onChange: (cells: Cell[][]) => void;
+};
+
+const EvolvingCellBoard: FC<EvolvingCellBoardProps> = (props) => {
+  const [_, startTransition] = useTransition();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: cells[i][j]
+  useEffect(() => {
+    (async () => {
+      await sleep(500);
+      const newCells = props.cells.map((row) => [...row]);
+      for (let i = 0; i < newCells.length; i++) {
+        for (let j = 0; j < newCells[i].length; j++) {
+          const newCell = deadOrAlive(props.cells[i][j], [
+            props.cells[i - 1]?.[j - 1],
+            props.cells[i - 1]?.[j],
+            props.cells[i - 1]?.[j + 1],
+            props.cells[i][j - 1],
+            props.cells[i][j + 1],
+            props.cells[i + 1]?.[j - 1],
+            props.cells[i + 1]?.[j],
+            props.cells[i + 1]?.[j + 1],
+          ]);
+          newCells[i][j] = newCell;
+        }
+      }
+      startTransition(() => {
+        props.onChange(newCells);
+      });
+    })();
+  }, [props.cells, props.onChange]);
+
+  return <CellBoard cells={props.cells} />;
+};
+
+type CellBoardProps = {
+  cells: Cell[][];
+  onClick?: (i: number, j: number) => void;
+};
+
+const CellBoard: FC<CellBoardProps> = (props) => {
+  const onClick = props.onClick;
+  const disabled = onClick === undefined;
+  return (
+    <div
+      className={classes.cells}
+      style={{
+        gridTemplateRows: `repeat(${props.cells.length}, 1fr)`,
+        gridTemplateColumns: `repeat(${props.cells[0].length}, 1fr)`,
+      }}
+    >
+      {props.cells.map((row, i) =>
+        row.map((column, j) => (
+          <button
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+            key={`${i}_${j}`}
+            type="button"
+            className={classes.cell}
+            style={{
+              backgroundColor: isAliveCell(column) ? "gray" : "white",
+            }}
+            onClick={disabled ? undefined : () => onClick(i, j)}
+            disabled={disabled}
+          />
+        )),
+      )}
+    </div>
+  );
+};
