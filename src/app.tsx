@@ -1,5 +1,12 @@
 import { Button, Select, Slider, TextField } from "@radix-ui/themes";
-import { ChangeEvent, FC, useEffect, useState, useTransition } from "react";
+import {
+  ChangeEvent,
+  FC,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import classes from "./app.module.css";
 import { type Cell, createCells, evelove, isAliveCell } from "./cell";
 import { PRESETS } from "./presets";
@@ -31,9 +38,21 @@ function App() {
 
   const [mode, setMode] = useState<Mode>("edit");
   const editDisabled = mode === "progress";
+  const rollback = useRef<Cell[][]>();
 
   const handleModeChange = () => {
+    if (mode === "edit") {
+      rollback.current = cells;
+    }
     setMode((prev) => (prev === "edit" ? "progress" : "edit"));
+  };
+
+  const handleRollback = () => {
+    if (rollback.current === undefined) {
+      return;
+    }
+    setCells(rollback.current);
+    rollback.current = undefined;
   };
 
   const [presetName, setPresetName] = useState("");
@@ -130,6 +149,13 @@ function App() {
             disabled={editDisabled}
           >
             Clear
+          </Button>
+          <Button
+            type="button"
+            onClick={handleRollback}
+            disabled={editDisabled || rollback.current === undefined}
+          >
+            Roolback
           </Button>
         </div>
       </div>
