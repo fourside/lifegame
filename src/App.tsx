@@ -36,12 +36,15 @@ function App() {
     setMode((prev) => (prev === "edit" ? "progress" : "edit"));
   };
 
+  const [presetName, setPresetName] = useState("");
   const handlePresetsChange = (value: string) => {
     const found = PRESETS.find((it) => it.name === value);
     if (found === undefined) {
       throw new Error(`not found ${value} in presets`);
     }
+    setPresetName(found.name);
     setCells(found.cells);
+    setSize({ width: found.cells[0].length, height: found.cells.length });
   };
 
   const handleCellChange = (newCells: Cell[][]) => {
@@ -49,7 +52,9 @@ function App() {
   };
 
   const handleClearClick = () => {
+    setPresetName("");
     setCells(createCells(size.width, size.height));
+    setSpeed(1);
   };
 
   const [speed, setSpeed] = useState(1);
@@ -86,6 +91,7 @@ function App() {
             presets
             <br />
             <Select.Root
+              value={presetName}
               onValueChange={handlePresetsChange}
               disabled={editDisabled}
             >
@@ -166,13 +172,13 @@ const EditableCellBoard: FC<EditableCellBoardProps> = (props) => {
   return <CellBoard cells={props.cells} onClick={handleCellClick} />;
 };
 
-const SPEEDS_TO_MS: Record<string, number> = {
-  "0.5": 1000,
-  "1": 500,
-  "1.5": 350,
-  "2": 250,
-  "2.5": 200,
-  "3": 150,
+const SPEEDS_TO_MS: Record<number, number> = {
+  0.5: 1000,
+  1: 500,
+  1.5: 350,
+  2: 250,
+  2.5: 200,
+  3: 150,
 };
 
 type EvolvingCellBoardProps = {
@@ -183,7 +189,7 @@ type EvolvingCellBoardProps = {
 
 const EvolvingCellBoard: FC<EvolvingCellBoardProps> = (props) => {
   const [_, startTransition] = useTransition();
-  const ms = SPEEDS_TO_MS[props.speed.toString()];
+  const ms = SPEEDS_TO_MS[props.speed];
 
   useEffect(() => {
     (async () => {
