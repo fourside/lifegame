@@ -1,6 +1,6 @@
 import { Button, Select, Slider, TextField } from "@radix-ui/themes";
 import { ChangeEvent, FC, useEffect, useState, useTransition } from "react";
-import classes from "./App.module.css";
+import classes from "./app.module.css";
 import { type Cell, createCells, evelove, isAliveCell } from "./cell";
 import { PRESETS } from "./presets";
 
