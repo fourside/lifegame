@@ -20,7 +20,6 @@
 
 .buttons {
 	display: grid;
-	grid: auto / 1fr 1fr;
 	gap: 4px;
 }
 
@@ -47,4 +46,28 @@
 
 .cell:disabled {
 	cursor: not-allowed;
+}
+
+.saveButton {
+	width: 100%;
+}
+
+.loader {
+  border-radius: 9999px;
+  border-top: 1px solid #B9BBC6;
+  border-bottom: 1px solid #B9BBC6;
+  border-right: 1px solid #B9BBC6;
+  border-left: 1px solid #8B8D98;
+  animation: spin 1s linear infinite;
+  width: 10px;
+  height: 10px;
+}
+
+@keyframes spin {
+  from {
+	rotate: 0deg;
+  }
+  to {
+	rotate: 360deg;
+  }
 }

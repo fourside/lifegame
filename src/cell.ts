@@ -1,6 +1,4 @@
-type DeadCell = "dead";
-type AliveCell = "alive";
-export type Cell = DeadCell | AliveCell;
+export type Cell = "dead" | "alive";
 
 type AroundCell = Cell | undefined;
 type Around8Cells = [
@@ -68,3 +66,22 @@ export function evelove(cells: Cell[][]): Cell[][] {
   }
   return newCells;
 }
+
+export function aliveCellPoints(cells: Cell[][]): Point[] {
+  return cells.flatMap((row, i) => {
+    return row.flatMap((cell, j) => {
+      if (isAliveCell(cell)) {
+        return { i, j };
+      }
+      return [];
+    });
+  });
+}
+
+type Point = { i: number; j: number };
+
+export type Lifegame = {
+  width: number;
+  height: number;
+  aliveCells: Point[];
+};

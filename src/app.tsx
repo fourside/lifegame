@@ -1,14 +1,23 @@
 import { Button, Select, Slider, TextField } from "@radix-ui/themes";
 import {
-  ChangeEvent,
-  FC,
+  type ChangeEvent,
+  type FC,
   useEffect,
   useRef,
   useState,
   useTransition,
 } from "react";
+import { useFormStatus } from "react-dom";
 import classes from "./app.module.css";
-import { type Cell, createCells, evelove, isAliveCell } from "./cell";
+import {
+  type Cell,
+  type Lifegame,
+  aliveCellPoints,
+  createCells,
+  evelove,
+  isAliveCell,
+} from "./cell";
+import { InlineErrorBoundary } from "./error-boundary";
 import { PRESETS } from "./presets";
 
 type Mode = "edit" | "progress";
@@ -80,6 +89,23 @@ function App() {
   const handleSpeedChange = (speed: number[]) => {
     setSpeed(speed[0]);
   };
+
+  async function saveLifegame() {
+    const lifegame: Lifegame = {
+      width: size.width,
+      height: size.height,
+      aliveCells: aliveCellPoints(cells),
+    };
+    const res = await fetch("/api/lifegames", {
+      method: "POST",
+      body: JSON.stringify(lifegame),
+    });
+    if (!res.ok) {
+      throw new Error(`${res.status} error`);
+    }
+    const text = await res.text();
+    console.log(text);
+  }
 
   return (
     <main className={classes.container}>
@@ -157,6 +183,11 @@ function App() {
           >
             Roolback
           </Button>
+          <InlineErrorBoundary>
+            <form action={saveLifegame}>
+              <SaveButton disabled={editDisabled} />
+            </form>
+          </InlineErrorBoundary>
         </div>
       </div>
       <div className={classes.board}>
@@ -173,6 +204,28 @@ function App() {
     </main>
   );
 }
+
+type SaveButtonProps = {
+  disabled: boolean;
+};
+
+const SaveButton: FC<SaveButtonProps> = (props) => {
+  const { pending } = useFormStatus();
+  return (
+    <Button
+      type="submit"
+      disabled={props.disabled}
+      className={classes.saveButton}
+    >
+      {pending && <Loader />}
+      Save
+    </Button>
+  );
+};
+
+const Loader: FC = () => {
+  return <div className={classes.loader} />;
+};
 
 export default App;
 
