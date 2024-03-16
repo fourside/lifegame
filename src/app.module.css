@@ -48,6 +48,10 @@
 	cursor: not-allowed;
 }
 
+.saveForm {
+	position: relative;
+}
+
 .saveButton {
 	width: 100%;
 }
@@ -71,3 +75,44 @@
 	rotate: 360deg;
   }
 }
+
+
+.popoverContent {
+	position: absolute;
+	top: 40px;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);;
+	padding: 16px;
+	background-color: white;
+}
+
+.popoverCallout {
+	position: relative;
+	white-space: nowrap;
+}
+
+.popoverCalloutIcon {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+}
+
+.description {
+	font-size: small;
+	color: gray;
+	position: absolute;
+	top: 0;
+	right: -8px;
+	transform: translateY(-100%);
+}
+
+.calloutCloseIcon {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+}
+
