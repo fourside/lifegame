@@ -1,2 +1,6 @@
 name = "lifegame"
-compatibility_date = "2024-03-04"
+compatibility_date = "2024-02-23"
+
+kv_namespaces = [
+  { binding = "LIFEGAME", id = "911beb04f188492288a881ba3f463630" }
+]
