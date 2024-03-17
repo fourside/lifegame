@@ -76,43 +76,25 @@
   }
 }
 
+.pageLoader {
+	display: grid;
+	place-items: center;
+	height: 100svh;
+}
 
-.popoverContent {
+.pageLoader > div {
+  border-radius: 9999px;
+  border-top: 8px solid #B9BBC6;
+  border-bottom: 8px solid #B9BBC6;
+  border-right: 8px solid #B9BBC6;
+  border-left: 8px solid #8B8D98;
+  animation: spin 1s linear infinite;
+  width: 50px;
+  height: 50px;
+}
+
+.popoverContainer {
 	position: absolute;
 	top: 40px;
 	left: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	border-radius: 8px;
-	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);;
-	padding: 16px;
-	background-color: white;
 }
-
-.popoverCallout {
-	position: relative;
-	white-space: nowrap;
-}
-
-.popoverCalloutIcon {
-	position: absolute;
-	top: 4px;
-	right: 4px;
-}
-
-.description {
-	font-size: small;
-	color: gray;
-	position: absolute;
-	top: 0;
-	right: -8px;
-	transform: translateY(-100%);
-}
-
-.calloutCloseIcon {
-	position: absolute;
-	top: 4px;
-	right: 4px;
-}
-

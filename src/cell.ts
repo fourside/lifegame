@@ -78,6 +78,14 @@ export function aliveCellPoints(cells: Cell[][]): Point[] {
   });
 }
 
+export function createCellsFromLifegame(lifegame: Lifegame): Cell[][] {
+  const cells = createCells(lifegame.width, lifegame.height);
+  for (const { i, j } of lifegame.aliveCells) {
+    cells[i][j] = "alive" as const;
+  }
+  return cells;
+}
+
 type Point = { i: number; j: number };
 
 export type Lifegame = {
@@ -85,3 +93,11 @@ export type Lifegame = {
   height: number;
   aliveCells: Point[];
 };
+
+export function getDefaultLifegame(): Lifegame {
+  return {
+    width: 30,
+    height: 30,
+    aliveCells: [],
+  };
+}

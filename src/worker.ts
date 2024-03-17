@@ -1,6 +1,7 @@
 import type { Fetcher, KVNamespace, Request } from "@cloudflare/workers-types";
-import { type Describe, array, number, object, validate } from "superstruct";
-import type { Lifegame } from "./cell";
+import { validate } from "superstruct";
+import { compress, decompress } from "./gzip";
+import { LifegameSchema } from "./schema";
 
 interface Env {
   ASSETS: Fetcher;
@@ -29,7 +30,6 @@ const routes: Route[] = [
     urlPattern: new URLPattern({ pathname: "/api/lifegames/:id" }),
     handlers: {
       GET: onGetLifgame,
-      DEELTE: onDeleteLifgame,
     },
   },
 ];
@@ -64,17 +64,6 @@ function findRoute(
   return undefined;
 }
 
-const LifegameSchema: Describe<Lifegame> = object({
-  width: number(),
-  height: number(),
-  aliveCells: array(
-    object({
-      i: number(),
-      j: number(),
-    }),
-  ),
-});
-
 async function onPostLifgame(req: Request, env: Env, _: URLPatternResult) {
   const json = await req.json();
   const [err, lifegame] = validate(json, LifegameSchema);
@@ -94,12 +83,36 @@ async function onPostLifgame(req: Request, env: Env, _: URLPatternResult) {
   });
 }
 
-async function onGetLifgame(_: Request, __: Env, ___: URLPatternResult) {
-  return new Response("get: ok");
-}
-
-async function onDeleteLifgame(_: Request, __: Env, ___: URLPatternResult) {
-  return new Response("delete: ok");
+async function onGetLifgame(
+  _: Request,
+  env: Env,
+  urlPatternResult: URLPatternResult,
+) {
+  const id = urlPatternResult.pathname.groups.id;
+  if (id === undefined) {
+    return new Response("routing mismatch: id not found", { status: 500 });
+  }
+  const value = await env.LIFEGAME.get(id, "arrayBuffer");
+  if (value === null) {
+    return new Response("not found", { status: 404 });
+  }
+  const str = await decompress(value);
+  try {
+    const json = JSON.parse(str);
+    const [err, lifegame] = validate(json, LifegameSchema);
+    if (err !== undefined) {
+      console.error(err);
+      return new Response("invalid post body", { status: 400 });
+    }
+    return new Response(JSON.stringify(lifegame), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return new Response("error", { status: 400 });
+  }
 }
 
 async function sha256(source: string): Promise<string> {
@@ -108,14 +121,4 @@ async function sha256(source: string): Promise<string> {
   return Array.from(new Uint8Array(b))
     .map((it) => it.toString(16).padStart(2, "0"))
     .join("");
-}
-
-async function compress(source: string): Promise<ArrayBuffer> {
-  const a = new TextEncoder().encode(source);
-  const compressionStream = new CompressionStream("gzip");
-  const writer = compressionStream.writable.getWriter();
-  await writer.write(a);
-  await writer.close();
-  const blob = await new Response(compressionStream.readable).blob();
-  return blob.arrayBuffer();
 }
