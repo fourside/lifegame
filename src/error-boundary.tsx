@@ -23,14 +23,13 @@ export class InlineErrorBoundary extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.hasError) {
-      return (
-        <div>
-          {this.props.children}
+    return (
+      <>
+        {this.props.children}
+        {this.state.hasError && (
           <span className={classes.errorMessage}>error occured.</span>
-        </div>
-      );
-    }
-    return this.props.children;
+        )}
+      </>
+    );
   }
 }
