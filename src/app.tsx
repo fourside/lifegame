@@ -133,8 +133,8 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
   };
 
   const [speed, setSpeed] = useState(1);
-  const handleSpeedChange = (speed: number[]) => {
-    setSpeed(speed[0]);
+  const handleSpeedChange = (speed: number) => {
+    setSpeed(speed);
   };
 
   const [popoverOpen, setPopoverOpen] = useState<
@@ -211,20 +211,11 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
             </Select.Root>
           </label>
         </div>
-        <div>
-          <label>
-            speed
-            <Slider
-              defaultValue={[1]}
-              min={0.5}
-              max={4}
-              step={0.5}
-              disabled={editDisabled}
-              onValueCommit={handleSpeedChange}
-            />
-          </label>
-          x{speed}
-        </div>
+        <SpeedSlider
+          speed={speed}
+          disabled={editDisabled}
+          onChange={handleSpeedChange}
+        />
         <div className={classes.buttons}>
           <Button type="button" onClick={handleModeChange}>
             {mode === "edit" ? "Start" : "Stop"}
@@ -276,6 +267,42 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
         )}
       </div>
     </main>
+  );
+};
+
+type SpeedSliderProps = {
+  speed: number;
+  disabled: boolean;
+  onChange: (speed: number) => void;
+};
+
+const SpeedSlider: FC<SpeedSliderProps> = (props) => {
+  const [speed, setSpeed] = useState(props.speed);
+
+  const handleChange = (speeds: number[]) => {
+    setSpeed(speeds[0]);
+  };
+
+  const handleCommit = (speeds: number[]) => {
+    props.onChange(speeds[0]);
+  };
+
+  return (
+    <div>
+      <label>
+        speed
+        <Slider
+          defaultValue={[2]}
+          min={0.5}
+          max={4}
+          step={0.5}
+          disabled={props.disabled}
+          onValueChange={handleChange}
+          onValueCommit={handleCommit}
+        />
+      </label>
+      x{speed}
+    </div>
   );
 };
 
