@@ -1,9 +1,16 @@
-import { Button, Select, Slider, TextField } from "@radix-ui/themes";
+import {
+  Button,
+  IconButton,
+  Select,
+  Slider,
+  TextField,
+} from "@radix-ui/themes";
 import {
   type ChangeEvent,
   type FC,
   Suspense,
   use,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -20,12 +27,13 @@ import {
   createCellsFromLifegame,
   evelove,
   getDefaultLifegame,
-  isAliveCell,
 } from "./cell";
 import { CopyPopover } from "./copy-popover";
 import { InlineErrorBoundary } from "./error-boundary";
+import { MoonIcon, SunIcon } from "./icons";
 import { PRESETS } from "./presets";
 import { LifegameSchema } from "./schema";
+import { ThemeContext } from "./theme-provider";
 
 function App() {
   const id = window.location.pathname;
@@ -157,6 +165,8 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     setPopoverOpen({ open: true, id });
   }
 
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+
   return (
     <main className={classes.container}>
       <div className={classes.sidemenu}>
@@ -247,6 +257,11 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
               )}
             </form>
           </InlineErrorBoundary>
+        </div>
+        <div>
+          <IconButton size="2" variant="ghost" onClick={toggleDarkMode}>
+            {darkMode === "light" ? <SunIcon /> : <MoonIcon />}
+          </IconButton>
         </div>
       </div>
       <div className={classes.board}>
@@ -375,9 +390,7 @@ const CellBoard: FC<CellBoardProps> = (props) => {
             key={`${i}_${j}`}
             type="button"
             className={classes.cell}
-            style={{
-              backgroundColor: isAliveCell(column) ? "gray" : "white",
-            }}
+            data-state={column}
             onClick={disabled ? undefined : () => onClick(i, j)}
             disabled={disabled}
           />

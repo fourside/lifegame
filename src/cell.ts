@@ -12,7 +12,7 @@ type Around8Cells = [
   AroundCell,
 ];
 
-export function isAliveCell(cell: Cell | undefined): boolean {
+function isAliveCell(cell: Cell | undefined): boolean {
   return cell === "alive";
 }
 
