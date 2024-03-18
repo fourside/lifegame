@@ -17,12 +17,10 @@ import {
   useTransition,
 } from "react";
 import { useFormStatus } from "react-dom";
-import { validate } from "superstruct";
 import classes from "./app.module.css";
 import {
   type Cell,
   type Lifegame,
-  aliveCellPoints,
   createCells,
   createCellsFromLifegame,
   evelove,
@@ -30,9 +28,9 @@ import {
 } from "./cell";
 import { CopyPopover } from "./copy-popover";
 import { InlineErrorBoundary } from "./error-boundary";
+import { getLifegame, postLifegame } from "./fetch-client";
 import { MoonIcon, SunIcon } from "./icons";
 import { PRESETS } from "./presets";
-import { LifegameSchema } from "./schema";
 import { ThemeContext } from "./theme-provider";
 
 function App() {
@@ -145,25 +143,10 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     setPopoverOpen({ open: false });
   };
 
-  async function saveLifegame() {
-    const lifegame: Lifegame = {
-      width: size.width,
-      height: size.height,
-      aliveCells: aliveCellPoints(cells),
-    };
-    const res = await fetch("/api/lifegames", {
-      method: "POST",
-      body: JSON.stringify(lifegame),
-    });
-    if (!res.ok) {
-      throw new Error(`${res.status} error`);
-    }
-    const id = res.headers.get("location");
-    if (id === null) {
-      throw new Error("location header not set");
-    }
+  const saveLifegameAction = async () => {
+    const id = await postLifegame(size.width, size.height, cells);
     setPopoverOpen({ open: true, id });
-  }
+  };
 
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
@@ -235,7 +218,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
             Roolback
           </Button>
           <InlineErrorBoundary>
-            <form action={saveLifegame} className={classes.saveForm}>
+            <form action={saveLifegameAction} className={classes.saveForm}>
               <SaveButton disabled={editDisabled} />
               {popoverOpen.open && (
                 <div className={classes.popoverContainer}>
@@ -463,15 +446,4 @@ async function sleep(ms: number): Promise<void> {
 
 function createUrl(path: string): string {
   return `${window.location.protocol}//${window.location.host}${path}`;
-}
-
-async function getLifegame(id: string): Promise<Lifegame> {
-  const res = await fetch(`/api/lifegames${id}`);
-  const json = await res.json();
-  const [err, lifegame] = validate(json, LifegameSchema);
-  if (err !== undefined) {
-    console.error(err);
-    throw new Error(err.message);
-  }
-  return lifegame;
 }
