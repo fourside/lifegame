@@ -152,9 +152,9 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
 
   return (
     <main className={classes.container}>
+      <h1>Lifegame</h1>
       <div className={classes.sidemenu}>
-        <h1>Lifegame</h1>
-        <div className={classes.size}>
+        <div className={classes.inputs}>
           <label>
             width
             <TextInput
@@ -173,8 +173,6 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
               disabled={editDisabled}
             />
           </label>
-        </div>
-        <div>
           <label>
             presets
             <br />

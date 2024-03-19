@@ -1,36 +1,74 @@
 .container {
 	display: grid;
-	grid: auto / 250px 1fr;
+	grid: auto 1fr / 250px 1fr;
 	height: 100vh;
 }
 
-.sidemenu {
-	padding: 32px;
-	display: flex;
-	flex-direction: column;
-	gap: 32px;
+.container > h1 {
+	padding: 32px 0 32px 32px;
 	border-right: 1px solid lightgray;;
 }
 
-.size {
+.sidemenu {
+	grid-row: 2 / 3;
+	padding: 0 32px 32px 32px;
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 8px;
+	border-right: 1px solid lightgray;;
+}
+
+.inputs {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .buttons {
 	display: grid;
 	gap: 4px;
+	padding: 32px 0;
 }
 
 .board {
+	grid-row: 1 / 3;
+	grid-column: 2 / 3;
 	overflow-y: auto;
 	min-height: 100vh;
 	width: min-content;
+	padding: 32px;
+}
+
+@media screen and (max-width: 430px) {
+	.container {
+		display: block;
+	}
+	.container > h1 {
+		border: none;
+		border-bottom: 1px solid lightgray;
+		padding: 16px;
+	}
+	.sidemenu {
+		padding: 16px;
+		border: none;
+		gap: 16px;
+	}
+	.inputs {
+		display: grid;
+		grid: auto / 1fr 1fr 1fr;
+		gap: 16px;
+	}
+	.buttons {
+		display: grid;
+		grid: auto auto / auto auto;
+		gap: 8px;
+	}
+	.board {
+		padding: 16px;
+	}
 }
 
 .cells {
-	padding: 32px;
 	display: grid;
 	gap: 2px;
 }
