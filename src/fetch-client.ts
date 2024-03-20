@@ -4,6 +4,9 @@ import { LifegameSchema } from "./schema";
 
 export async function getLifegame(id: string): Promise<Lifegame> {
   const res = await fetch(`/api/lifegames${id}`);
+  if (!res.ok) {
+    throw new Error(`${res.status} error`);
+  }
   const json = await res.json();
   const [err, lifegame] = validate(json, LifegameSchema);
   if (err !== undefined) {

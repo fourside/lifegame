@@ -81,20 +81,21 @@
 	padding: 0;
 	cursor: pointer;
 	background-color: white;
+
+	&[data-state="alive"] {
+		border: 1px solid gray;
+		background-color: gray;
+	}
+
+	&[data-state="dead"]:hover {
+		background-color: #efefef;
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+	}
 }
 
-.cell[data-state="alive"] {
-	border: 1px solid gray;
-	background-color: gray;
-}
-
-.cell[data-state="dead"]:hover {
-	background-color: #efefef;
-}
-
-.cell:disabled {
-	cursor: not-allowed;
-}
 
 .saveForm {
 	position: relative;
