@@ -96,6 +96,19 @@
 	}
 }
 
+[class="dark-theme"] {
+	.cell {
+		background-color: lightgray;
+		border: 1px solid lightgray;
+		&[data-state="alive"] {
+			border: 1px solid gray;
+			background-color: gray;
+		}
+		&[data-state="dead"]:hover {
+			background-color: #e9e9f9;
+		}
+	}
+}
 
 .saveForm {
 	position: relative;
