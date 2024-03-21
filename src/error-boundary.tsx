@@ -9,7 +9,7 @@ type State = {
   hasError: boolean;
 };
 
-export class InlineErrorBoundary extends Component<Props, State> {
+export class FormErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
   };

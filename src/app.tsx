@@ -17,6 +17,7 @@ import {
   useTransition,
 } from "react";
 import { useFormStatus } from "react-dom";
+import { ErrorBoundary } from "react-error-boundary";
 import classes from "./app.module.css";
 import {
   type Cell,
@@ -27,7 +28,7 @@ import {
   getDefaultLifegame,
 } from "./cell";
 import { CopyPopover } from "./copy-popover";
-import { InlineErrorBoundary } from "./error-boundary";
+import { FormErrorBoundary } from "./error-boundary";
 import { getLifegame, postLifegame } from "./fetch-client";
 import { MoonIcon, SunIcon } from "./icons";
 import { PRESETS } from "./presets";
@@ -39,11 +40,21 @@ function App() {
     return <LifegameComponent lifegame={getDefaultLifegame()} />;
   }
   return (
-    <Suspense fallback={<PageLoader />}>
-      <FetchLifegameComponent lifegame={getLifegame(id)} />
-    </Suspense>
+    <ErrorBoundary FallbackComponent={ErrorPage}>
+      <Suspense fallback={<PageLoader />}>
+        <FetchLifegameComponent lifegame={getLifegame(id)} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
+
+const ErrorPage: FC = () => {
+  return (
+    <div>
+      <h2>Error</h2>
+    </div>
+  );
+};
 
 type FetchLifegameComponentProps = {
   lifegame: Promise<Lifegame>;
@@ -51,11 +62,7 @@ type FetchLifegameComponentProps = {
 
 const FetchLifegameComponent: FC<FetchLifegameComponentProps> = (props) => {
   const lifegame = use(props.lifegame);
-  return (
-    <Suspense fallback={<Loader />}>
-      <LifegameComponent lifegame={lifegame} />
-    </Suspense>
-  );
+  return <LifegameComponent lifegame={lifegame} />;
 };
 
 type Mode = "edit" | "progress";
@@ -215,7 +222,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           >
             Roolback
           </Button>
-          <InlineErrorBoundary>
+          <FormErrorBoundary>
             <form action={saveLifegameAction} className={classes.saveForm}>
               <SaveButton disabled={editDisabled} />
               {popoverOpen.open && (
@@ -228,7 +235,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
                 </div>
               )}
             </form>
-          </InlineErrorBoundary>
+          </FormErrorBoundary>
         </div>
         <div>
           <IconButton size="2" variant="ghost" onClick={toggleDarkMode}>
