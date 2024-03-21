@@ -1,6 +1,6 @@
 import { validate } from "superstruct";
-import { type Cell, type Lifegame, aliveCellPoints } from "./cell";
-import { LifegameSchema } from "./schema";
+import { type Cell } from "./cell";
+import { type Lifegame, LifegameSchema, aliveCellPoints } from "./lifegame";
 
 export async function getLifegame(id: string): Promise<Lifegame> {
   const res = await fetch(`/api/lifegames${id}`);

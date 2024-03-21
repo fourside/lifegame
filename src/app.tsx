@@ -12,6 +12,7 @@ import {
   use,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useTransition,
@@ -21,16 +22,15 @@ import { ErrorBoundary } from "react-error-boundary";
 import classes from "./app.module.css";
 import {
   type Cell,
-  type Lifegame,
   createCells,
   createCellsFromLifegame,
   evelove,
-  getDefaultLifegame,
 } from "./cell";
 import { CopyPopover } from "./copy-popover";
 import { FormErrorBoundary } from "./error-boundary";
 import { getLifegame, postLifegame } from "./fetch-client";
 import { MoonIcon, SunIcon } from "./icons";
+import { Lifegame, getDefaultLifegame } from "./lifegame";
 import { PRESETS } from "./presets";
 import { ThemeContext } from "./theme-provider";
 
@@ -72,29 +72,35 @@ type LifegameComponentProps = {
 };
 
 const LifegameComponent: FC<LifegameComponentProps> = (props) => {
-  const [size, setSize] = useState({
-    width: props.lifegame.width,
-    height: props.lifegame.height,
-  });
+  const [width, setWidth] = useState(props.lifegame.width.toString());
+  const [height, setHeight] = useState(props.lifegame.height.toString());
 
   const [cells, setCells] = useState<Cell[][]>(
     createCellsFromLifegame(props.lifegame),
   );
 
-  const handleWidthChange = (str: string) => {
-    const value = Number.parseInt(str);
-    const width = Number.isNaN(value) ? 0 : value;
-    setSize((prev) => ({ ...prev, width }));
+  const handleWidthChange = (value: string) => {
+    setWidth(value);
   };
+
+  const isValidWidth = useMemo(() => {
+    return /^\d+$/.test(width);
+  }, [width]);
+
+  const handleHeightChange = (value: string) => {
+    setHeight(value);
+  };
+
+  const isValidHeight = useMemo(() => {
+    return /^\d+$/.test(height);
+  }, [height]);
 
   const cellSizeChange = () => {
-    setCells(createCells(size.width, size.height, cells));
-  };
-
-  const handleHeightChange = (str: string) => {
-    const value = Number.parseInt(str);
-    const height = Number.isNaN(value) ? 0 : value;
-    setSize((prev) => ({ ...prev, height }));
+    if (isValidWidth && isValidHeight) {
+      setCells(
+        createCells(Number.parseInt(width), Number.parseInt(height), cells),
+      );
+    }
   };
 
   const [mode, setMode] = useState<Mode>("edit");
@@ -124,7 +130,8 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     }
     setPresetName(found.name);
     setCells(found.cells);
-    setSize({ width: found.cells[0].length, height: found.cells.length });
+    setHeight(found.cells.length.toString());
+    setWidth(found.cells[0].length.toString());
   };
 
   const handleCellChange = (newCells: Cell[][]) => {
@@ -133,7 +140,9 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
 
   const handleClearClick = () => {
     setPresetName("");
-    setCells(createCells(size.width, size.height));
+    const w = isValidWidth ? Number.parseInt(width) : props.lifegame.width;
+    const h = isValidHeight ? Number.parseInt(height) : props.lifegame.height;
+    setCells(createCells(w, h));
     setSpeed(1);
   };
 
@@ -151,7 +160,14 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
   };
 
   const saveLifegameAction = async () => {
-    const id = await postLifegame(size.width, size.height, cells);
+    if (!isValidWidth || !isValidHeight) {
+      return;
+    }
+    const id = await postLifegame(
+      Number.parseInt(width),
+      Number.parseInt(height),
+      cells,
+    );
     setPopoverOpen({ open: true, id });
   };
 
@@ -165,20 +181,28 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           <label>
             width
             <TextInput
-              value={size.width}
+              value={width}
               onChange={handleWidthChange}
               onBlur={cellSizeChange}
+              isError={!isValidWidth}
               disabled={editDisabled}
             />
+            {!isValidWidth && (
+              <span className={classes.errorMessage}>invalid width</span>
+            )}
           </label>
           <label>
             height
             <TextInput
-              value={size.height}
+              value={height}
               onChange={handleHeightChange}
               onBlur={cellSizeChange}
+              isError={!isValidHeight}
               disabled={editDisabled}
             />
+            {!isValidHeight && (
+              <span className={classes.errorMessage}>invalid height</span>
+            )}
           </label>
           <label>
             presets
@@ -205,7 +229,11 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           onChange={handleSpeedChange}
         />
         <div className={classes.buttons}>
-          <Button type="button" onClick={handleModeChange}>
+          <Button
+            type="button"
+            onClick={handleModeChange}
+            disabled={!isValidWidth || !isValidHeight}
+          >
             {mode === "edit" ? "Start" : "Stop"}
           </Button>
           <Button
@@ -418,6 +446,7 @@ const CellBoard: FC<CellBoardProps> = (props) => {
 type TextInputProps = {
   value: string | number;
   disabled: boolean;
+  isError: boolean;
   onChange: (value: string) => void;
   onBlur: () => void;
 };
@@ -438,6 +467,8 @@ const TextInput: FC<TextInputProps> = (props) => {
         disabled={props.disabled}
         onChange={handleChange}
         onBlur={handleBlur}
+        className={classes.textInput}
+        data-is-error={props.isError}
       />
     </TextField.Root>
   );

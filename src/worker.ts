@@ -1,7 +1,7 @@
 import type { Fetcher, KVNamespace, Request } from "@cloudflare/workers-types";
 import { validate } from "superstruct";
 import { compress, decompress } from "./gzip";
-import { LifegameSchema } from "./schema";
+import { LifegameSchema } from "./lifegame";
 
 interface Env {
   ASSETS: Fetcher;

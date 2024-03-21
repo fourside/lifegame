@@ -160,3 +160,14 @@
 	top: 40px;
 	left: 0;
 }
+
+.errorMessage {
+	font-size: smaller;
+	color: #CE2C31;
+}
+
+.textInput {
+	&[data-is-error="true"] {
+		border-color: #CE2C31;
+	}
+}

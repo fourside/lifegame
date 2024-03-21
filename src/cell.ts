@@ -1,3 +1,5 @@
+import { Lifegame } from "./lifegame";
+
 export type Cell = "dead" | "alive";
 
 type AroundCell = Cell | undefined;
@@ -12,7 +14,7 @@ type Around8Cells = [
   AroundCell,
 ];
 
-function isAliveCell(cell: Cell | undefined): boolean {
+export function isAliveCell(cell: Cell | undefined): boolean {
   return cell === "alive";
 }
 
@@ -67,37 +69,10 @@ export function evelove(cells: Cell[][]): Cell[][] {
   return newCells;
 }
 
-export function aliveCellPoints(cells: Cell[][]): Point[] {
-  return cells.flatMap((row, i) => {
-    return row.flatMap((cell, j) => {
-      if (isAliveCell(cell)) {
-        return { i, j };
-      }
-      return [];
-    });
-  });
-}
-
 export function createCellsFromLifegame(lifegame: Lifegame): Cell[][] {
   const cells = createCells(lifegame.width, lifegame.height);
   for (const { i, j } of lifegame.aliveCells) {
     cells[i][j] = "alive" as const;
   }
   return cells;
-}
-
-type Point = { i: number; j: number };
-
-export type Lifegame = {
-  width: number;
-  height: number;
-  aliveCells: Point[];
-};
-
-export function getDefaultLifegame(): Lifegame {
-  return {
-    width: 30,
-    height: 30,
-    aliveCells: [],
-  };
 }
