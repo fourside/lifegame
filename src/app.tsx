@@ -140,9 +140,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
 
   const handleClearClick = () => {
     setPresetName("");
-    const w = isValidWidth ? Number.parseInt(width) : props.lifegame.width;
-    const h = isValidHeight ? Number.parseInt(height) : props.lifegame.height;
-    setCells(createCells(w, h));
+    setCells(createCells(cells[0].length, cells.length));
     setSpeed(1);
   };
 
@@ -163,12 +161,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     if (!isValidWidth || !isValidHeight) {
       return;
     }
-    const id = await postLifegame(
-      Number.parseInt(width),
-      Number.parseInt(height),
-      speed,
-      cells,
-    );
+    const id = await postLifegame(cells, speed);
     setPopoverOpen({ open: true, id });
   };
 
@@ -253,7 +246,9 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           </Button>
           <FormErrorBoundary>
             <form action={saveLifegameAction} className={classes.saveForm}>
-              <SaveButton disabled={editDisabled} />
+              <SaveButton
+                disabled={editDisabled || !isValidWidth || !isValidHeight}
+              />
               {popoverOpen.open && (
                 <div className={classes.popoverContainer}>
                   <CopyPopover

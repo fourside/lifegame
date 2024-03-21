@@ -17,14 +17,12 @@ export async function getLifegame(id: string): Promise<Lifegame> {
 }
 
 export async function postLifegame(
-  width: number,
-  height: number,
-  speed: number,
   cells: Cell[][],
+  speed: number,
 ): Promise<string> {
   const lifegame: Lifegame = {
-    width,
-    height,
+    width: cells[0].length,
+    height: cells.length,
     speed,
     aliveCells: aliveCellPoints(cells),
   };
