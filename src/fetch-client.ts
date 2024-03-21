@@ -19,11 +19,13 @@ export async function getLifegame(id: string): Promise<Lifegame> {
 export async function postLifegame(
   width: number,
   height: number,
+  speed: number,
   cells: Cell[][],
 ): Promise<string> {
   const lifegame: Lifegame = {
     width,
     height,
+    speed,
     aliveCells: aliveCellPoints(cells),
   };
   const res = await fetch("/api/lifegames", {

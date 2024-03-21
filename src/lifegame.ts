@@ -6,6 +6,7 @@ type Point = { i: number; j: number };
 export type Lifegame = {
   width: number;
   height: number;
+  speed: number;
   aliveCells: Point[];
 };
 
@@ -13,6 +14,7 @@ export function getDefaultLifegame(): Lifegame {
   return {
     width: 30,
     height: 30,
+    speed: 2,
     aliveCells: [],
   };
 }
@@ -31,6 +33,7 @@ export function aliveCellPoints(cells: Cell[][]): Point[] {
 export const LifegameSchema: Describe<Lifegame> = object({
   width: number(),
   height: number(),
+  speed: number(),
   aliveCells: array(
     object({
       i: number(),

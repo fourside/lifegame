@@ -146,7 +146,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     setSpeed(1);
   };
 
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(props.lifegame.speed);
   const handleSpeedChange = (speed: number) => {
     setSpeed(speed);
   };
@@ -166,6 +166,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     const id = await postLifegame(
       Number.parseInt(width),
       Number.parseInt(height),
+      speed,
       cells,
     );
     setPopoverOpen({ open: true, id });
@@ -308,7 +309,7 @@ const SpeedSlider: FC<SpeedSliderProps> = (props) => {
       <label>
         speed
         <Slider
-          defaultValue={[2]}
+          value={[speed]}
           min={0.5}
           max={4}
           step={0.5}
