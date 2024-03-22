@@ -23,13 +23,13 @@ const routes: Route[] = [
   {
     urlPattern: new URLPattern({ pathname: "/api/lifegames" }),
     handlers: {
-      POST: onPostLifgame,
+      POST: onPostLifegame,
     },
   },
   {
     urlPattern: new URLPattern({ pathname: "/api/lifegames/:id" }),
     handlers: {
-      GET: onGetLifgame,
+      GET: onGetLifegame,
     },
   },
 ];
@@ -64,7 +64,7 @@ function findRoute(
   return undefined;
 }
 
-async function onPostLifgame(req: Request, env: Env, _: URLPatternResult) {
+async function onPostLifegame(req: Request, env: Env, _: URLPatternResult) {
   const json = await req.json();
   const [err, lifegame] = validate(json, LifegameSchema);
   if (err !== undefined) {
@@ -83,7 +83,7 @@ async function onPostLifgame(req: Request, env: Env, _: URLPatternResult) {
   });
 }
 
-async function onGetLifgame(
+async function onGetLifegame(
   _: Request,
   env: Env,
   urlPatternResult: URLPatternResult,
