@@ -67,6 +67,10 @@ const FetchLifegameComponent: FC<FetchLifegameComponentProps> = (props) => {
 
 type Mode = "edit" | "progress";
 
+type ValidationResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; message: string };
+
 type LifegameComponentProps = {
   lifegame: Lifegame;
 };
@@ -83,24 +87,41 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
     setWidth(value);
   };
 
-  const isValidWidth = useMemo(() => {
-    return /^\d+$/.test(width);
+  const validationWidth = useMemo<ValidationResult<number>>(() => {
+    if (!/^\d+$/.test(width)) {
+      return { ok: false, message: "width is number" };
+    }
+    const w = Number.parseInt(width);
+    if (w > 1000) {
+      return { ok: false, message: "max is 999" };
+    }
+    return { ok: true, value: w };
   }, [width]);
 
   const handleHeightChange = (value: string) => {
     setHeight(value);
   };
 
-  const isValidHeight = useMemo(() => {
-    return /^\d+$/.test(height);
+  const validationHeight = useMemo<ValidationResult<number>>(() => {
+    if (!/^\d+$/.test(height)) {
+      return { ok: false, message: "height is number" };
+    }
+    const h = Number.parseInt(height);
+    if (h > 1000) {
+      return { ok: false, message: "max is 999" };
+    }
+    return { ok: true, value: h };
   }, [height]);
 
+  const isValid = validationWidth.ok && validationHeight.ok;
+
   const cellSizeChange = () => {
-    if (isValidWidth && isValidHeight) {
-      setCells(
-        createCells(Number.parseInt(width), Number.parseInt(height), cells),
-      );
+    if (!isValid) {
+      return;
     }
+    setCells(
+      createCells(Number.parseInt(width), Number.parseInt(height), cells),
+    );
   };
 
   const [mode, setMode] = useState<Mode>("edit");
@@ -158,7 +179,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
   };
 
   const saveLifegameAction = async () => {
-    if (!isValidWidth || !isValidHeight) {
+    if (!isValid) {
       return;
     }
     const id = await postLifegame(cells, speed);
@@ -178,11 +199,13 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
               value={width}
               onChange={handleWidthChange}
               onBlur={cellSizeChange}
-              isError={!isValidWidth}
+              isError={!validationWidth.ok}
               disabled={editDisabled}
             />
-            {!isValidWidth && (
-              <span className={classes.errorMessage}>invalid width</span>
+            {!validationWidth.ok && (
+              <span className={classes.errorMessage}>
+                {validationWidth.message}
+              </span>
             )}
           </label>
           <label>
@@ -191,11 +214,13 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
               value={height}
               onChange={handleHeightChange}
               onBlur={cellSizeChange}
-              isError={!isValidHeight}
+              isError={!validationHeight.ok}
               disabled={editDisabled}
             />
-            {!isValidHeight && (
-              <span className={classes.errorMessage}>invalid height</span>
+            {!validationHeight.ok && (
+              <span className={classes.errorMessage}>
+                {validationHeight.message}
+              </span>
             )}
           </label>
           <label>
@@ -223,11 +248,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           onChange={handleSpeedChange}
         />
         <div className={classes.buttons}>
-          <Button
-            type="button"
-            onClick={handleModeChange}
-            disabled={!isValidWidth || !isValidHeight}
-          >
+          <Button type="button" onClick={handleModeChange} disabled={!isValid}>
             {mode === "edit" ? "Start" : "Stop"}
           </Button>
           <Button
@@ -246,9 +267,7 @@ const LifegameComponent: FC<LifegameComponentProps> = (props) => {
           </Button>
           <FormErrorBoundary>
             <form action={saveLifegameAction} className={classes.saveForm}>
-              <SaveButton
-                disabled={editDisabled || !isValidWidth || !isValidHeight}
-              />
+              <SaveButton disabled={editDisabled || !isValid} />
               {popoverOpen.open && (
                 <div className={classes.popoverContainer}>
                   <CopyPopover
