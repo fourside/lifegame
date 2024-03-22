@@ -7,6 +7,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "biome ci src",
+    "test": "vitest",
     "preview": "vite preview",
     "pages:dev": "wrangler pages dev --port 3000 --compatibility-date=2024-02-23 --script-path src/worker.ts --kv LIFEGAME -- npm start",
     "pages:build-worker": "npm run build",
@@ -32,6 +33,7 @@
     "typescript": "^5.2.2",
     "urlpattern-polyfill": "^10.0.0",
     "vite": "^5.1.4",
+    "vitest": "^1.4.0",
     "wrangler": "^3.34.2"
   },
   "overrides": {

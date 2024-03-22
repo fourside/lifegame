@@ -72,7 +72,9 @@ export function evelove(cells: Cell[][]): Cell[][] {
 export function createCellsFromLifegame(lifegame: Lifegame): Cell[][] {
   const cells = createCells(lifegame.width, lifegame.height);
   for (const { i, j } of lifegame.aliveCells) {
-    cells[i][j] = "alive" as const;
+    if (cells[i]?.[j] !== undefined) {
+      cells[i][j] = "alive" as const;
+    }
   }
   return cells;
 }
